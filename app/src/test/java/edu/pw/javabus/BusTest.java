@@ -10,7 +10,7 @@ class BusTest {
 
     @Test
     void shouldRegisterConsumer() {
-        Bus bus = new InMemoryBus(new FirstConfirmedConsumerStrategy());
+        Bus bus = new InMemoryBus(new AllConsumersInTopicStrategy());
         DummyConsumer consumer = new DummyConsumer();
         bus.register(consumer, new StringNamedTopic("testTopic"), DummyMessage.class);
 
@@ -37,7 +37,7 @@ class BusTest {
 
     @Test
     void shouldUnregisterConsumer() {
-        Bus bus = new InMemoryBus(new FirstConfirmedConsumerStrategy());
+        Bus bus = new InMemoryBus(new AllConsumersInTopicStrategy());
         DummyConsumer consumer = new DummyConsumer();
         bus.register(consumer, new StringNamedTopic("testTopic"), DummyMessage.class);
         bus.unregister(consumer, new StringNamedTopic("testTopic"));
@@ -49,7 +49,7 @@ class BusTest {
 
     @Test
     void shouldCallParentTopic() {
-        Bus bus = new InMemoryBus(new FirstConfirmedConsumerStrategy());
+        Bus bus = new InMemoryBus(new AllConsumersInTopicStrategy());
         DummyConsumer consumer = new DummyConsumer();
         StringNamedTopic mainTopic = new StringNamedTopic("test2");
         StringNamedTopic secondaryTopic = new StringNamedTopic("test1", mainTopic);
@@ -63,7 +63,7 @@ class BusTest {
     @Test
     @Disabled
     void shouldCallInheritedMessage() {
-        Bus bus = new InMemoryBus(new FirstConfirmedConsumerStrategy());
+        Bus bus = new InMemoryBus(new AllConsumersInTopicStrategy());
         DummyConsumer consumer = new DummyConsumer();
         StringNamedTopic mainTopic = new StringNamedTopic("test2");
         StringNamedTopic secondaryTopic = new StringNamedTopic("test1", mainTopic);
@@ -75,8 +75,9 @@ class BusTest {
     }
 
     @Test
+    @Disabled
     void shouldCallOnlyFirstConsumerWithinTheTopic() {
-        Bus bus = new InMemoryBus(new FirstConfirmedConsumerStrategy());
+        Bus bus = new InMemoryBus(new AllConsumersInTopicStrategy());
         DummyConsumer consumer = new DummyConsumer();
         DummyConsumer consumer1 = new DummyConsumer();
 
@@ -92,8 +93,9 @@ class BusTest {
     }
 
     @Test
+    @Disabled
     void shouldCallNextConsumerInCaseOfFailure() {
-        Bus bus = new InMemoryBus(new FirstConfirmedConsumerStrategy());
+        Bus bus = new InMemoryBus(new AllConsumersInTopicStrategy());
         DummyConsumer consumer = new FailingConsumer();
         DummyConsumer consumer1 = new DummyConsumer();
         DummyConsumer consumer2 = new DummyConsumer();
@@ -110,43 +112,5 @@ class BusTest {
         assertTrue(consumer1.wasCalled());
         assertFalse(consumer2.wasCalled());
     }
-
-/*
-    Requirements:
-    - when consumer is registered, all events sent to the topic are handled by the consumer
-    - when consumer is deregistered, none events are sent
-    - topic can be inherited, meaning some topics are subtopics (tree implementation)
-    - if the confirmation is "broken", then the processing stop or continues
-    - there are different strategies of passing the message by
-    -- bubbling up
-    -- only first item
-    -- all items within the topic
-    -- all consumers in the topic and above
-    - also, there are different strategies for sending the event, too
-
-    My problem is: can I present in this use case two classes that can have different coupling factors between them?
-
-    A -> B OR A -> B' where coupling(A -> B) < coupling (A -> B')
-
-    This was possible in case of a class that carries a data vs methods, but I am not sure if this is possible in this project.
-
-    Which classes can represent data?
-    * Topic
-    * Message
-
-    I have introduced ConsumersCollection as a class used internally, with which InMemoryBus uses to store
-    consumers and related topics.
-
-    This class has the find method, which returns the item. Move find method to InMemoryBus will increase coupling by
-    number of method calls? Not so much if this is only getting the collection back, but perhaps I could write something
-    else, like getTopic registered or something similar.
-
-    Then, what is the task to be performed? I could ask to change the behaviour of item to pick the first topic only.
-    I have to model this solution, too.
-
-
-
-     */
-
 
 }

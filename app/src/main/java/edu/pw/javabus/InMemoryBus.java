@@ -1,15 +1,13 @@
 package edu.pw.javabus;
 
-import java.util.concurrent.Executor;
-
 public class InMemoryBus implements Bus {
 
     private final RegisteredConsumers registeredConsumers = new RegisteredConsumers();
 
-    private final DeliveryStrategy deliveryStrategy;
+    private final MessageDelivery messageDelivery;
 
-    public InMemoryBus(DeliveryStrategy deliveryStrategy) {
-        this.deliveryStrategy = deliveryStrategy;
+    InMemoryBus(MessageDelivery messageDelivery) {
+        this.messageDelivery = messageDelivery;
     }
 
     @Override
@@ -24,7 +22,7 @@ public class InMemoryBus implements Bus {
 
     @Override
     public <T extends Message> void send(Topic topic, T message) {
-        deliveryStrategy.deliver(registeredConsumers, topic, message);
+        messageDelivery.deliver(registeredConsumers, topic, message);
     }
 
 }
