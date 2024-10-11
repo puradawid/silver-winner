@@ -66,10 +66,9 @@ class BusTest {
         Bus bus = new InMemoryBus(new AllConsumersInTopicStrategy());
         DummyConsumer consumer = new DummyConsumer();
         StringNamedTopic mainTopic = new StringNamedTopic("test2");
-        StringNamedTopic secondaryTopic = new StringNamedTopic("test1", mainTopic);
 
         bus.register(consumer, mainTopic, DummyMessage.class);
-        bus.send(secondaryTopic, new InheritedDummyMessage());
+        bus.send(mainTopic, new InheritedDummyMessage());
 
         assertTrue(consumer.wasCalled());
     }
